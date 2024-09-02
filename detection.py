@@ -1,28 +1,54 @@
 import cv2
 import mediapipe as mp
 import numpy as np
-import socket
+import requests
+import time
+from pythonosc import osc_message_builder
+from pythonosc import udp_client
+
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
-# Set up UDP socket for communication with Pure Data
-UDP_IP = "127.0.0.1"  # Localhost
-UDP_PORT = 3333       # The same port used in your Pure Data patch
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-def send_data(left_shoulder, right_shoulder):
-    left_shoulder_x = left_shoulder.x
-    right_shoulder_x = right_shoulder.x
-   
-    center = left_shoulder_x/2
-    center = 5
-    # Convert coordinates to a byte array and send them over UDPq
-    data = f"{center}"
-    print(data)
-    sock.sendto(data.encode('utf-8'), (UDP_IP, UDP_PORT))
+osc_client = udp_client.SimpleUDPClient("127.0.0.1", 9000) 
 
-    
+def send_data(left_wrist, right_wrist):
+        try:
+            # sending left wrist x
+            osc_message_l_wrist_x = osc_message_builder.OscMessageBuilder(address="/l_wrist_x")
+            osc_message_l_wrist_x.add_arg(left_wrist.x)
+            osc_message_l_wrist_x = osc_message_l_wrist_x.build()
+            osc_client.send(osc_message_l_wrist_x)
+            print("left wrist x sent over OSC")
+
+            # sending left wrist z
+            osc_message_l_wrist_z = osc_message_builder.OscMessageBuilder(address="/l_wrist_z")
+            osc_message_l_wrist_z.add_arg(left_wrist.z)
+            osc_message_l_wrist_z = osc_message_l_wrist_z.build()
+            osc_client.send(osc_message_l_wrist_z)
+            print("left wrist z sent over OSC.")
+
+            # sending right wrist x
+            osc_message_r_wrist_x = osc_message_builder.OscMessageBuilder(address="/r_wrist_x")
+            osc_message_r_wrist_x.add_arg(right_wrist.x)
+            osc_message_r_wrist_x = osc_message_r_wrist_x.build()
+            osc_client.send(osc_message_r_wrist_x)
+            print("right wrist x sent over OSC")
+
+             # sending right wrist z
+            osc_message_r_wrist_z = osc_message_builder.OscMessageBuilder(address="/r_wrist_z")
+            osc_message_r_wrist_z.add_arg(right_wrist.z)
+            osc_message_r_wrist_z = osc_message_r_wrist_z.build()
+            osc_client.send(osc_message_r_wrist_z)
+            print("right wrist z sent over OSC")
+
+            
+        except requests.exceptions.RequestException as e:
+            print("error while sending coordinates")
+            raise e
+
+
 #VIDEO FEED
 cap = cv2.VideoCapture(0) # 0 - index of built-in laptop camera
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose: ## Mediapipe instance
@@ -46,18 +72,18 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         except:
             pass
 
-        left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-        right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
+        left_wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
+        right_wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
 
-        send_data(left_shoulder, right_shoulder)
+        send_data(left_wrist, right_wrist)
 
         # Format text to display
-        left_shoulder_text = f"Left Shoulder: x={left_shoulder.x:.2f}, z={left_shoulder.z:.2f}"
-        right_shoulder_text = f"Right Shoulder: x={right_shoulder.x:.2f}, z={right_shoulder.z:.2f}"
+        left_wrist_text = f"Left wrist: x={left_wrist.x:.2f}, z={left_wrist.z:.2f}"
+        right_wrist_text = f"Right wrist: x={right_wrist.x:.2f}, z={right_wrist.z:.2f}"
 
         # Put text on the frame
-        cv2.putText(image, left_shoulder_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
-        cv2.putText(image, right_shoulder_text, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.putText(image, left_wrist_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.putText(image, right_wrist_text, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
 
 
 
