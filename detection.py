@@ -2,7 +2,6 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import requests
-import time
 from pythonosc import osc_message_builder
 from pythonosc import udp_client
 
@@ -20,28 +19,28 @@ def send_data(left_wrist, right_wrist):
             osc_message_l_wrist_x.add_arg(left_wrist.x)
             osc_message_l_wrist_x = osc_message_l_wrist_x.build()
             osc_client.send(osc_message_l_wrist_x)
-            print("left wrist x sent over OSC")
+            
 
             # sending left wrist z
             osc_message_l_wrist_z = osc_message_builder.OscMessageBuilder(address="/l_wrist_z")
             osc_message_l_wrist_z.add_arg(left_wrist.z)
             osc_message_l_wrist_z = osc_message_l_wrist_z.build()
             osc_client.send(osc_message_l_wrist_z)
-            print("left wrist z sent over OSC.")
+        
 
             # sending right wrist x
             osc_message_r_wrist_x = osc_message_builder.OscMessageBuilder(address="/r_wrist_x")
             osc_message_r_wrist_x.add_arg(right_wrist.x)
             osc_message_r_wrist_x = osc_message_r_wrist_x.build()
             osc_client.send(osc_message_r_wrist_x)
-            print("right wrist x sent over OSC")
+           
 
              # sending right wrist z
             osc_message_r_wrist_z = osc_message_builder.OscMessageBuilder(address="/r_wrist_z")
             osc_message_r_wrist_z.add_arg(right_wrist.z)
             osc_message_r_wrist_z = osc_message_r_wrist_z.build()
             osc_client.send(osc_message_r_wrist_z)
-            print("right wrist z sent over OSC")
+           
 
             
         except requests.exceptions.RequestException as e:
