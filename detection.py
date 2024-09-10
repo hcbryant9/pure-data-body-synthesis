@@ -9,37 +9,37 @@ from pythonosc import udp_client
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
+draw_landmarks = True
+show_video = True
+toggle_text_1 = "Controls:"
+toggle_text_2 = "t - toggle landmarks"
+toggle_text_3 = "v - toggle video feed"
 
+# Starting y-coordinate and vertical spacing
+y_position = 90
+vertical_spacing = 30
 osc_client = udp_client.SimpleUDPClient("127.0.0.1", 9000) 
 
 def send_data(left_wrist, right_wrist):
         try:
-            # sending left wrist x
-            osc_message_l_wrist_x = osc_message_builder.OscMessageBuilder(address="/l_wrist_x")
-            osc_message_l_wrist_x.add_arg(left_wrist.x)
-            osc_message_l_wrist_x = osc_message_l_wrist_x.build()
-            osc_client.send(osc_message_l_wrist_x)
+            dist_x = right_wrist.x - left_wrist.x
+            dist_y = right_wrist.y - left_wrist.y
+
+            # sending dist in x
+            osc_message_dist_x = osc_message_builder.OscMessageBuilder(address="/dist_x")
+            osc_message_dist_x.add_arg(dist_x)
+            osc_message_dist_x = osc_message_dist_x.build()
+            osc_client.send(osc_message_dist_x)
             
 
-            # sending left wrist z
-            osc_message_l_wrist_z = osc_message_builder.OscMessageBuilder(address="/l_wrist_z")
-            osc_message_l_wrist_z.add_arg(left_wrist.z)
-            osc_message_l_wrist_z = osc_message_l_wrist_z.build()
-            osc_client.send(osc_message_l_wrist_z)
         
 
-            # sending right wrist x
-            osc_message_r_wrist_x = osc_message_builder.OscMessageBuilder(address="/r_wrist_x")
-            osc_message_r_wrist_x.add_arg(right_wrist.x)
-            osc_message_r_wrist_x = osc_message_r_wrist_x.build()
-            osc_client.send(osc_message_r_wrist_x)
+            # sending dist in y
+            osc_message_dist_y = osc_message_builder.OscMessageBuilder(address="/dist_y")
+            osc_message_dist_y.add_arg(dist_y)
+            osc_message_dist_y = osc_message_dist_y.build()
+            osc_client.send(osc_message_dist_y)
            
-
-             # sending right wrist z
-            osc_message_r_wrist_z = osc_message_builder.OscMessageBuilder(address="/r_wrist_z")
-            osc_message_r_wrist_z.add_arg(right_wrist.z)
-            osc_message_r_wrist_z = osc_message_r_wrist_z.build()
-            osc_client.send(osc_message_r_wrist_z)
            
 
             
@@ -77,26 +77,38 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         send_data(left_wrist, right_wrist)
 
         # Format text to display
-        left_wrist_text = f"Left wrist: x={left_wrist.x:.2f}, z={left_wrist.z:.2f}"
-        right_wrist_text = f"Right wrist: x={right_wrist.x:.2f}, z={right_wrist.z:.2f}"
+        left_wrist_text = f"Left wrist: x={left_wrist.x:.2f}, y={left_wrist.y:.2f}"
+        right_wrist_text = f"Right wrist: x={right_wrist.x:.2f}, y={right_wrist.y:.2f}"
 
-        # Put text on the frame
-        cv2.putText(image, left_wrist_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
-        cv2.putText(image, right_wrist_text, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+        if show_video:
+            cv2.putText(image, left_wrist_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+            cv2.putText(image, right_wrist_text, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
 
+            # Render landmarks if enabled
+            if draw_landmarks:
+                mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
+                                          mp_drawing.DrawingSpec(color=(245, 117, 66), thickness=2, circle_radius=2),
+                                          mp_drawing.DrawingSpec(color=(245, 117, 66), thickness=2, circle_radius=2))
 
-
-        #Render
-        mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
-                                  mp_drawing.DrawingSpec(color=(245,117,66), thickness = 2, circle_radius = 2),
-                                  mp_drawing.DrawingSpec(color=(245,117,66), thickness = 2, circle_radius = 2)
-                                  )
-
+            # Show video if enabled
+            cv2.imshow("feed", image)
         
-        cv2.imshow("feed", image)
 
-        if cv2.waitKey(10) & 0xFF == ord('q'):
+        key = cv2.waitKey(10) & 0xFF
+        if key == ord('q'):  # Quit if 'q' is pressed
             break
+        elif key == ord('t'):  # Toggle drawing if 't' is pressed
+            draw_landmarks = not draw_landmarks  # Toggle the flag
+        elif key == ord('v'):  # Toggle video output if 'v' is pressed
+            show_video = not show_video  # Toggle video visibility
+            if not show_video:  # If video is turned off, display a black screen
+                black_frame = np.zeros_like(image)  # Create a black frame of the same size as the current image
+                cv2.putText(black_frame, toggle_text_1, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+                cv2.putText(black_frame, toggle_text_2, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+                cv2.putText(black_frame, toggle_text_3, (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+                cv2.imshow("feed", black_frame)
+                
+
     cap.release()
     cv2.destroyAllWindows
 
