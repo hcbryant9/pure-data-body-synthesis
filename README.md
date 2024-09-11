@@ -25,3 +25,12 @@ python -m venv venv
 ./venv/Scripts/activate
 
 pip install -r requirements.txt
+
+
+## Known Issues
+
+mediapipe==0.10.10 is not compatible with Mac M1. Please downgrade to mediapipe==0.10.9 for Mac users.
+
+mediapipe==0.10.09 is not compatible with Windoww. Please upgrade to meidapipe==0.10.10 for Windows. 
+
+The default camera on mac is index 1 and on windows it is 0. If you are getting unexpected errors, check which camera you are using.
