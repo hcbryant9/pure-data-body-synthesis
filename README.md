@@ -14,7 +14,7 @@ data through OSC using python-osc To be used along side pure-data for
 sound exhibition.
 
 
-![](./docs/sound_gif.gif)
+![](./docs/mediapipe.png)
 
 ## Mediapipe & Pose Detection
 
