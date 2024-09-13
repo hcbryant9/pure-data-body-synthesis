@@ -19,7 +19,7 @@ sound exhibition.
 ## Mediapipe & Pose Detection
 
 "The MediaPipe Pose Landmarker task lets you detect landmarks of human bodies in an image or video. You can use this task to identify key body locations, analyze posture, and categorize movements. This task uses machine learning (ML) models that work with single images or video. The task outputs body pose landmarks in image coordinates and in 3-dimensional world coordinates."
-[Media Pipe Documentation] (https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker)
+[Media Pipe Documentation](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker)
 
 ## Controls
 
