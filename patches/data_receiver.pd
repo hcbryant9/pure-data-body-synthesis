@@ -1,4 +1,4 @@
-#N canvas 863 263 549 568 12;
+#N canvas 863 263 1126 568 12;
 #X declare -lib mrpeach;
 #X obj 68 30 declare -lib mrpeach;
 #X obj 177 211 netreceive -u -b;
@@ -6,15 +6,15 @@
 #X obj 170 276 oscparse;
 #X obj 60 351 route list;
 #X floatatom 280 513 5 0 0 0 - - - 0;
-#X floatatom 319 415 5 0 0 0 - - - 0;
+#X floatatom 356 482 5 0 0 0 - - - 0;
 #X floatatom 52 494 5 0 0 0 - - - 0;
-#X obj 37 410 route dist_x dist_y;
 #X text 10 525 distance in hands x;
 #X text 266 534 distance in hands y;
+#X obj 37 410 route dist_x dist_y nose_x;
 #X connect 1 0 3 0;
 #X connect 2 0 1 0;
 #X connect 3 0 4 0;
-#X connect 4 0 8 0;
-#X connect 8 0 7 0;
-#X connect 8 1 5 0;
-#X connect 8 2 6 0;
+#X connect 4 0 10 0;
+#X connect 10 0 7 0;
+#X connect 10 1 5 0;
+#X connect 10 2 6 0;
